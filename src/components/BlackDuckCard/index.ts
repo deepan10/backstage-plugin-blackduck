@@ -1,0 +1,1 @@
+export { BlackDuckCardComponent } from './BlackDuckCard';
