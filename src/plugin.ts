@@ -1,26 +1,48 @@
-import { createPlugin, createRoutableExtension } from '@backstage/core-plugin-api';
+import {
+  createApiFactory,
+  createPlugin,
+  discoveryApiRef,
+  identityApiRef,
+  createRoutableExtension
+} from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
 
+import { blackduckApiRef, BlackDuckClient } from './api';
+
 export const blackduckPlugin = createPlugin({
   id: 'blackduck',
+  apis: [
+    createApiFactory({
+      api: blackduckApiRef,
+      deps: {
+        discoveryApi: discoveryApiRef,
+        identityApi: identityApiRef,
+      },
+      factory: ({ discoveryApi, identityApi }) =>
+        new BlackDuckClient({
+          discoveryApi,
+          identityApi,
+        }),
+    }),
+  ],
   routes: {
     root: rootRouteRef,
   },
 });
 
-export const BlackduckPage = blackduckPlugin.provide(
+export const BlackDuckPage = blackduckPlugin.provide(
   createRoutableExtension({
-    name: 'BlackduckPage',
+    name: 'BlackDuckPage',
     component: () =>
       import('./components/BlackDuckPage').then(m => m.BlackDuckPageComponent),
     mountPoint: rootRouteRef,
   }),
 );
 
-export const BlackduckCard = blackduckPlugin.provide(
+export const BlackDuckCard = blackduckPlugin.provide(
   createRoutableExtension({
-    name: 'BlackduckCard',
+    name: 'BlackDuckCard',
     component: () =>
       import('./components/BlackDuckCard').then(m => m.BlackDuckCardComponent),
     mountPoint: rootRouteRef,

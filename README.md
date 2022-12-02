@@ -1,6 +1,6 @@
-# blackduck
+# backstage-plugin-blackduck
 
-Welcome to the blackduck plugin!
+Welcome to the `backstage-plugin-blackduck` plugin!
 
 
 ## Getting started
@@ -60,7 +60,7 @@ Import the plugin to `packages/app/src/components/catalog/EntityPage.tsx` and ad
 ### EntityPage.tsx
 ```typescript
 // ...
-import { BlackduckPage } from '@deepan10/backstage-plugin-blackduck';
+import { BlackDuckPage } from '@deepan10/backstage-plugin-blackduck';
 // ...
 const serviceEntityPage = (
     <EntityLayout>
@@ -73,7 +73,7 @@ const serviceEntityPage = (
     </EntityLayout.Route>
     //...
     <EntityLayout.Route path="/blackduck" title="Security">      
-        <BlackduckPage />    
+        <BlackDuckPage />    
     </EntityLayout.Route>
     // ...    
   </EntityLayout>
@@ -82,10 +82,10 @@ const serviceEntityPage = (
 `Note: If you dont want to display the Service page if no annotation specified in catalog.`
 ```typescript
 //...
-import { BlackduckPage, isBlackDuckAvailable } from '@deepan10/backstage-plugin-blackduck';
+import { BlackDuckPage, isBlackDuckAvailable } from '@deepan10/backstage-plugin-blackduck';
 //...
 <EntityLayout.Route if={isBlackDuckAvailable} path="/blackduck" title="Security">      
-    <BlackduckPage />    
+    <BlackDuckPage />    
 </EntityLayout.Route>
 // ...    
 
