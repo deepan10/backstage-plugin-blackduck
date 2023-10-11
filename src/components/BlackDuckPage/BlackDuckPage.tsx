@@ -48,12 +48,34 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const defaultColumns: TableColumn[] = [
+
+export const defaultColumns: TableColumn[] = [
   { title: 'Component Name', field: 'componentName' },
   { title: 'Component Version', field: 'componentVersionName' },
   { title: 'Vulnerability Name', field: 'vulnerabilityName' },
-  { title: 'Severity', field: 'severity' },
+  {
+    title: 'Published On',
+    field: 'vulnerabilityPublishedDate',
+    type: 'date',
+  },
+  {
+    title: 'Updated On',
+    field: 'vulnerabilityUpdatedDate',
+    type: 'date',
+  },
+  { title: 'Scores', field: 'scores', width: '100px' },
+  {
+    title: 'Severity',
+    field: 'severity',
+  },
   { title: 'Link', field: 'link' },
+];
+
+export const blackduckFilters: TableFilter[] = [
+  {
+    column: 'Severity',
+    type: 'multiple-select',
+  },
 ];
 
 type DenseTableProps = {
@@ -183,7 +205,7 @@ export const BlackDuckPageComponent = ({columns, filters }: BlackDuckPageCompone
   const { projectName, projectVersion } = getProjectAnnotation(entity);
 
   return isBlackDuckAvailable(entity) ? (
-    <PageContent projectName={projectName} projectVersion={projectVersion} columns={columns || defaultColumns} filters={filters || []}/>
+    <PageContent projectName={projectName} projectVersion={projectVersion} columns={columns || defaultColumns} filters={filters || blackduckFilters}/>
   ) : (
     <MissingAnnotationEmptyState annotation={BLACKDUCK_PROJECT_ANNOTATION} />
   );
