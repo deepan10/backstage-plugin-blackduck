@@ -65,5 +65,24 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "contributors": [
+    {
+      "email": "abhaysoni.developer@gmail.com",
+      "url": "https://github.com/Abhay-soni-developer",
+      "name": "abhaysoni"
+    }
+  ],
+  "maintainers": [
+    {
+      "email": "abhaysoni.developer@gmail.com",
+      "url": "https://github.com/Abhay-soni-developer",
+      "name": "abhaysoni"
+    },
+    {
+      "email": "deepan0433@gmail.com",
+      "url": "https://github.com/deepan10",
+      "name": "deepan kumar"
+    }
+  ],
 }
