@@ -6,6 +6,7 @@ import {
   Progress,
   EmptyState,
   MissingAnnotationEmptyState,
+  TableFilter,
 } from '@backstage/core-components';
 import Alert from '@material-ui/lab/Alert';
 import useAsync from 'react-use/lib/useAsync';
@@ -13,14 +14,14 @@ import LaunchSharp from '@material-ui/icons/LaunchSharp';
 import { useApi } from '@backstage/core-plugin-api';
 import { Link } from '@backstage/core-components';
 
-import { Chip } from '@material-ui/core';
+import { Chip, Tooltip } from '@material-ui/core';
 import { useEntity } from '@backstage/plugin-catalog-react';
 
 import { blackduckApiRef } from '../../api';
 import {
   getProjectAnnotation,
   BLACKDUCK_PROJECT_ANNOTATION,
-  isBlackDuckAvailable
+  isBlackDuckAvailable,
 } from '../../utils/commonUtil';
 
 const useStyles = makeStyles(theme => ({
@@ -28,15 +29,15 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.common.white,
   },
   chipHigh: {
-    margin: 0,
+    margin: 1,
     backgroundColor: '#5a100c',
   },
   chipCritical: {
-    margin: 0,
+    margin: 1,
     backgroundColor: '#9c251f',
   },
   chipMedium: {
-    margin: 0,
+    margin: 1,
     backgroundColor: '#e78c87',
   },
   chipLow: {
@@ -47,23 +48,47 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+
+export const defaultColumns: TableColumn[] = [
+  { title: 'Component Name', field: 'componentName' },
+  { title: 'Component Version', field: 'componentVersionName' },
+  { title: 'Vulnerability Name', field: 'vulnerabilityName' },
+  {
+    title: 'Published On',
+    field: 'vulnerabilityPublishedDate',
+    type: 'date',
+  },
+  {
+    title: 'Updated On',
+    field: 'vulnerabilityUpdatedDate',
+    type: 'date',
+  },
+  { title: 'Scores', field: 'scores', width: '100px' },
+  {
+    title: 'Severity',
+    field: 'severity',
+  },
+  { title: 'Link', field: 'link' },
+];
+
+export const blackduckFilters: TableFilter[] = [
+  {
+    column: 'Severity',
+    type: 'multiple-select',
+  },
+];
+
 type DenseTableProps = {
   vulnList: any[];
+  columns: TableColumn[];
+  filters: TableFilter[];
 };
 
-export const DenseTable = ({ vulnList }: DenseTableProps) => {
+export const DenseTable = ({ vulnList, columns, filters }: DenseTableProps) => {
   const classes = useStyles();
 
-  const columns: TableColumn[] = [
-    { title: 'Component Name', field: 'componentName' },
-    { title: 'Component Version', field: 'componentVersionName' },
-    { title: 'Vulnerability Name', field: 'vulnerabilityName' },
-    { title: 'Severity', field: 'severity' },
-    { title: 'Link', field: 'link' },
-  ];
-
   const data = vulnList.map(item => {
-    let gateColor;
+    let gateColor: string;
 
     switch (item.vulnerabilityWithRemediation.severity) {
       case 'CRITICAL': {
@@ -92,12 +117,30 @@ export const DenseTable = ({ vulnList }: DenseTableProps) => {
       componentName: item.componentName,
       componentVersionName: item.componentVersionName,
       vulnerabilityName: item.vulnerabilityWithRemediation.vulnerabilityName,
-      severity: (
-        <Chip
-          label={item.vulnerabilityWithRemediation.severity}
-          classes={{ root: gateColor, label: classes.chipLabel }}
-        />
+      vulnerabilityPublishedDate: new Date(
+        item.vulnerabilityWithRemediation.vulnerabilityPublishedDate,
+      ).toLocaleDateString(),
+      vulnerabilityUpdatedDate: new Date(
+        item.vulnerabilityWithRemediation.vulnerabilityUpdatedDate,
+      ).toLocaleDateString(),
+      scores: (
+        <Tooltip
+          title={[
+            `base score: ${item.vulnerabilityWithRemediation.baseScore}`,
+            <br />,
+            `impact score: ${item.vulnerabilityWithRemediation.impactSubscore}`,
+            <br />,
+            `exploitability score: ${item.vulnerabilityWithRemediation.exploitabilitySubscore}`,
+          ]}
+          aria-label="scores"
+        >
+          <Chip
+            label={item.vulnerabilityWithRemediation.overallScore}
+            classes={{ root: gateColor, label: classes.chipLabel }}
+          />
+        </Tooltip>
       ),
+      severity: item.vulnerabilityWithRemediation.severity,
       link: (
         <Link to={item.componentVersion}>
           {' '}
@@ -109,20 +152,27 @@ export const DenseTable = ({ vulnList }: DenseTableProps) => {
 
   return (
     <Table
-      title="Vulnerabilities"
-      options={{ search: false, paging: false }}
+      options={{ search: true, paging: true }}
       columns={columns}
       data={data}
+      filters={filters}
     />
   );
 };
 
 type PageContentProps = {
   projectName: string;
-  projectVersion: string
+  projectVersion: string;
+  columns: TableColumn[];
+  filters: TableFilter[];
 };
 
-export const PageContent = ({projectName, projectVersion}: PageContentProps) => {
+export const PageContent = ({
+  projectName,
+  projectVersion,
+  columns,
+  filters
+}: PageContentProps) => {
   const blackduckApi = useApi(blackduckApiRef);
   const { value, loading, error } = useAsync(async () => {
     const data: any = await blackduckApi.getVulns(projectName, projectVersion);
@@ -142,15 +192,21 @@ export const PageContent = ({projectName, projectVersion}: PageContentProps) => 
   } else if (error) {
     return <Alert severity="error">{error.message}</Alert>;
   }
-  return <DenseTable vulnList={value.items || []} />;
+  return <DenseTable vulnList={value.items || []} columns={columns} filters={filters}/>;
+};
+
+type BlackDuckPageComponentProps = {
+  columns ?: TableColumn[];
+  filters?: TableFilter[]
 }
 
-export const BlackDuckPageComponent = () => {
-  const { entity } = useEntity();  
-  const { projectName, projectVersion } = getProjectAnnotation(entity);  
+export const BlackDuckPageComponent = ({columns, filters }: BlackDuckPageComponentProps) => {
+  const { entity } = useEntity();
+  const { projectName, projectVersion } = getProjectAnnotation(entity);
+
   return isBlackDuckAvailable(entity) ? (
-    <PageContent 
-      projectName={projectName}
-      projectVersion={projectVersion}
-    />) : <MissingAnnotationEmptyState annotation={BLACKDUCK_PROJECT_ANNOTATION} />;
+    <PageContent projectName={projectName} projectVersion={projectVersion} columns={columns || defaultColumns} filters={filters || blackduckFilters}/>
+  ) : (
+    <MissingAnnotationEmptyState annotation={BLACKDUCK_PROJECT_ANNOTATION} />
+  );
 };
