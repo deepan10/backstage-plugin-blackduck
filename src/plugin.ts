@@ -48,3 +48,12 @@ export const BlackDuckCard = blackduckPlugin.provide(
     mountPoint: rootRouteRef,
   }),
 );
+
+export const RiskCard = blackduckPlugin.provide(
+  createRoutableExtension({
+    name: 'RiskCard',
+    component: () =>
+      import('./components/BlackDuckCard').then(m => m.RiskCardComponent),
+    mountPoint: rootRouteRef,
+  }),
+);

@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: yarn install
+      - run: yarn install --ignore-engines
       - run: yarn tsc      
       - run: yarn build      
 
@@ -42,6 +42,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: yarn install      
+      - run: yarn install --ignore-engines 
       - run: yarn lint
   
