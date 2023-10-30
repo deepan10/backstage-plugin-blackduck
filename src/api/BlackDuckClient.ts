@@ -34,4 +34,26 @@ export class BlackDuckClient implements BlackDuckApi {
 
     return response.json();
   }
+
+  public async getRiskProfile(
+    projectName: string,
+    projectVersion: string,
+  ): Promise<any> {
+    const baseUrl = `${await this.discoveryApi.getBaseUrl('blackduck')}`;
+    const vulnURL = `${baseUrl}/risk-profile/${projectName}/${projectVersion}`;
+    const { token: idToken } = await this.identityApi.getCredentials();
+    const response = await fetch(vulnURL, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(idToken && { Authorization: `Bearer ${idToken}` }),
+      },
+    });
+
+    if (!response.ok) {
+      throw await ResponseError.fromResponse(response);
+    }
+
+    return response.json();
+  }
+  
 }

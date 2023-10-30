@@ -9,3 +9,7 @@ export const blackduckApiRef = createApiRef<BlackDuckApi>({
 export interface BlackDuckApi {
   getVulns(projectName: string, projectVersion: string): Promise<any>;
 };
+
+export interface BlackDuckApi {
+  getRiskProfile(projectName: string, projectVersion: string): Promise<any>;
+};

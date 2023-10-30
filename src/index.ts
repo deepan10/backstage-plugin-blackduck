@@ -1,4 +1,4 @@
-export { blackduckPlugin, BlackDuckPage, BlackDuckCard } from "./plugin";
+export { blackduckPlugin, BlackDuckPage, BlackDuckCard, RiskCard } from "./plugin";
 export {
   isBlackDuckAvailable,
   BLACKDUCK_PROJECT_ANNOTATION,
